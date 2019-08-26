@@ -1,0 +1,34 @@
+{
+    "name": "conf-edui2018",
+    "description": "",
+    "services": [
+        {
+            "type": "endpoint",
+            "name": "conf-edui2018",
+            "endpoint": "http://localhost:3979/api/messages",
+            "appId": "",
+            "appPassword": "",
+            "id": "1"
+        },
+        {
+            "type": "luis",
+            "name": "conf-edui2018",
+            "appId": "fc691f73-2717-4cef-b049-c8f00b00dcb1",
+            "version": "1.0",
+            "authoringKey": "cf84228ed7fa41f1b6bed7fc39ed9a4d",
+            "region": "westus",
+            "id": "2"
+        },
+        {
+            "type": "qna",
+            "name": "conf-edui2018",
+            "kbId": "3694973c-f5fd-423c-96a1-410a574e4318",
+            "subscriptionKey": "8ae06cf2b95840e4bb246a031d3b20b3",
+            "endpointKey": "9c8de63c-6cc2-4966-8552-69134d73b2b8",
+            "hostname": "https://conf-edui2018-qna.azurewebsites.net/qnamaker",
+            "id": "3"
+        }
+    ],
+    "padlock": "",
+    "version": "2.0"
+}
