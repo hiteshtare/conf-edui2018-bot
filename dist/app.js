@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const botbuilder_1 = require("botbuilder");
 const restify = require("restify");
+const bot_1 = require("./bot");
 let server = restify.createServer();
 server.listen(process.env.port || process.env.PORT || 3979, () => {
     console.log(`${server.name} listening on ${server.url}`);
@@ -18,16 +19,10 @@ const adapter = new botbuilder_1.BotFrameworkAdapter({
     appId: process.env.MICROSOFT_APP_ID,
     appPassword: process.env.MICROSOFT_APP_PASSWORD
 });
-const conversationState = new botbuilder_1.ConversationState(new botbuilder_1.MemoryStorage());
+const echo = new bot_1.EchoBot();
 server.post("/api/messages", (req, res) => {
     adapter.processActivity(req, res, (context) => __awaiter(this, void 0, void 0, function* () {
-        if (context.activity.type === 'message') {
-            const state = conversationState.get(context);
-            yield context.sendActivity(`You said ${context.activity.text}`);
-        }
-        else {
-            yield context.sendActivity(`${context.activity.type} event detected.`);
-        }
+        yield echo.onTurn(context);
     }));
 });
 //# sourceMappingURL=app.js.map
