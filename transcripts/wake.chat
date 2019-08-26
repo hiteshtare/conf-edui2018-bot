@@ -1,0 +1,13 @@
+user=Hitesh
+bot=edui Conference
+
+user: hello
+bot: Hello! Would you like me to call you?
+
+user: Hitesh
+bot: Hello, Hitesh. Here are some of the examples I can help you with:
+* Are there any talks on Bot Framework?
+* When is Hitesh Tare speaking?
+* Where can I here the typescript talk?
+
+bot: Just type in whatever you need! If you get stuck, just type "help" and I'll do what I can.
