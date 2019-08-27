@@ -9,8 +9,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const botbuilder_1 = require("botbuilder");
+const botbuilder_ai_1 = require("botbuilder-ai");
+const botframework_config_1 = require("botframework-config");
 const restify = require("restify");
 const bot_1 = require("./bot");
+const dotenv_1 = require("dotenv");
+dotenv_1.config();
+const botConfig = botframework_config_1.BotConfiguration.loadSync('./conf-edui2018.bot');
 let server = restify.createServer();
 server.listen(process.env.port || process.env.PORT || 3979, () => {
     console.log(`${server.name} listening on ${server.url}`);
@@ -19,7 +24,12 @@ const adapter = new botbuilder_1.BotFrameworkAdapter({
     appId: process.env.MICROSOFT_APP_ID,
     appPassword: process.env.MICROSOFT_APP_PASSWORD
 });
-const echo = new bot_1.EchoBot();
+const qnamaker = new botbuilder_ai_1.QnAMaker({
+    knowledgeBaseId: process.env.QNA_KNOWLEDGE_BASE_ID,
+    endpointKey: process.env.QNA_ENDPOINT_KEY,
+    host: process.env.QNA_HOST_NAME
+});
+const echo = new bot_1.ConfBot(qnamaker);
 server.post("/api/messages", (req, res) => {
     adapter.processActivity(req, res, (context) => __awaiter(this, void 0, void 0, function* () {
         yield echo.onTurn(context);
