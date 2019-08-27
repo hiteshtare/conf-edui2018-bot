@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const botbuilder_ai_1 = require("botbuilder-ai");
+const parser_1 = require("./parser");
 class ConfBot {
     constructor(qnaMaker, luis) {
         this._qnaMaker = qnaMaker;
@@ -25,6 +26,28 @@ class ConfBot {
                     yield this._luis.recognize(context).then((res) => __awaiter(this, void 0, void 0, function* () {
                         const top = botbuilder_ai_1.LuisRecognizer.topIntent(res);
                         yield context.sendActivity(`The top intent found was ${top}`);
+                        let data;
+                        switch (top) {
+                            case "Location":
+                            case "Speaker":
+                            case "Time":
+                            case "Topic":
+                                data = parser_1.getData(res.entities);
+                                if (data.length > 1) {
+                                    console.log(data);
+                                    break;
+                                }
+                                else if (data.length == 1) {
+                                    console.log(data);
+                                    break;
+                                }
+                                else {
+                                    break;
+                                }
+                            default:
+                                yield context.sendActivity(`No way to handle ${top}`);
+                                break;
+                        }
                     }));
                 }
             }

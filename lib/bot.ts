@@ -1,5 +1,7 @@
+import { SpeakerSession } from './types';
 import { TurnContext } from 'botbuilder';
 import { QnAMaker, LuisRecognizer } from 'botbuilder-ai';
+import { getData } from './parser';
 
 export class ConfBot {
   private _qnaMaker: QnAMaker;
@@ -22,7 +24,29 @@ export class ConfBot {
         await this._luis.recognize(context).then(async (res) => {
           const top = LuisRecognizer.topIntent(res);
           await context.sendActivity(`The top intent found was ${top}`);
-        });
+          let data: SpeakerSession[];
+          switch (top) {
+            case "Location":
+            case "Speaker":
+            case "Time":
+            case "Topic":
+              data = getData(res.entities);
+              if (data.length > 1) {
+                console.log(data);
+                break;
+              } else if (data.length == 1) {
+                console.log(data);
+                break;
+              }
+              else {
+                //
+                break;
+              }
+            default:
+              await context.sendActivity(`No way to handle ${top}`);
+              break;
+          }// end of switch
+        });// end of _luis.recognize
       }
     }
     else {

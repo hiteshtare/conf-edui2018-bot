@@ -11,6 +11,7 @@
   },
   "files": [
     "./lib/types.ts",
+    "./lib/parser.ts",
     "./lib/app.ts",
     "./lib/bot.ts"
   ]
