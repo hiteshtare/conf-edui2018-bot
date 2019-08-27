@@ -24,29 +24,17 @@ export class ConfBot {
       else {
         await this._luis.recognize(context).then(async (res) => {
           const top = LuisRecognizer.topIntent(res);
-          await context.sendActivity(`The top intent found was ${top}`);
-          let data: SpeakerSession[];
-          switch (top) {
-            case "Location":
-            case "Speaker":
-            case "Time":
-            case "Topic":
-              data = getData(res.entities);
-              if (data.length > 1) {
-                console.log(createCarousal(data, top));
-                break;
-              } else if (data.length == 1) {
-                console.log(createHeroCard(data[0], top));
-                break;
-              }
-              else {
-                //
-                break;
-              }
-            default:
-              await context.sendActivity(`No way to handle ${top}`);
-              break;
-          }// end of switch
+          const data: SpeakerSession[] = getData(res.entities);
+
+          if (top === "Time") {
+            //
+          }
+          else if (data.length > 1) {
+            await context.sendActivity(createCarousal(data, top));
+          }
+          else if (data.length === 1) {
+            await context.sendActivity({ attachments: [createHeroCard(data[0], top)] });
+          }
         });// end of _luis.recognize
       }
     }

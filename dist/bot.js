@@ -26,28 +26,14 @@ class ConfBot {
                 else {
                     yield this._luis.recognize(context).then((res) => __awaiter(this, void 0, void 0, function* () {
                         const top = botbuilder_ai_1.LuisRecognizer.topIntent(res);
-                        yield context.sendActivity(`The top intent found was ${top}`);
-                        let data;
-                        switch (top) {
-                            case "Location":
-                            case "Speaker":
-                            case "Time":
-                            case "Topic":
-                                data = parser_1.getData(res.entities);
-                                if (data.length > 1) {
-                                    console.log(card_1.createCarousal(data, top));
-                                    break;
-                                }
-                                else if (data.length == 1) {
-                                    console.log(card_1.createHeroCard(data[0], top));
-                                    break;
-                                }
-                                else {
-                                    break;
-                                }
-                            default:
-                                yield context.sendActivity(`No way to handle ${top}`);
-                                break;
+                        const data = parser_1.getData(res.entities);
+                        if (top === "Time") {
+                        }
+                        else if (data.length > 1) {
+                            yield context.sendActivity(card_1.createCarousal(data, top));
+                        }
+                        else if (data.length === 1) {
+                            yield context.sendActivity({ attachments: [card_1.createHeroCard(data[0], top)] });
                         }
                     }));
                 }
