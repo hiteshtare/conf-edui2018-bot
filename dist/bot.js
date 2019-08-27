@@ -8,9 +8,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const botbuilder_ai_1 = require("botbuilder-ai");
 class ConfBot {
-    constructor(qnaMaker) {
+    constructor(qnaMaker, luis) {
         this._qnaMaker = qnaMaker;
+        this._luis = luis;
     }
     onTurn(context) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -18,6 +20,12 @@ class ConfBot {
                 const qnaResults = yield this._qnaMaker.generateAnswer(context.activity.text);
                 if (qnaResults.length > 0) {
                     yield context.sendActivity(qnaResults[0].answer);
+                }
+                else {
+                    yield this._luis.recognize(context).then((res) => __awaiter(this, void 0, void 0, function* () {
+                        const top = botbuilder_ai_1.LuisRecognizer.topIntent(res);
+                        yield context.sendActivity(`The top intent found was ${top}`);
+                    }));
                 }
             }
             else {

@@ -29,7 +29,12 @@ const qnamaker = new botbuilder_ai_1.QnAMaker({
     endpointKey: process.env.QNA_ENDPOINT_KEY,
     host: process.env.QNA_HOST_NAME
 });
-const echo = new bot_1.ConfBot(qnamaker);
+const luis = new botbuilder_ai_1.LuisRecognizer({
+    applicationId: process.env.LUIS_APPLICATION_ID,
+    endpointKey: process.env.LUIS_ENDPOINT_KEY,
+    endpoint: process.env.LUIS_ENDPOINT
+});
+const echo = new bot_1.ConfBot(qnamaker, luis);
 server.post("/api/messages", (req, res) => {
     adapter.processActivity(req, res, (context) => __awaiter(this, void 0, void 0, function* () {
         yield echo.onTurn(context);

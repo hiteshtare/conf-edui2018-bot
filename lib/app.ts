@@ -1,5 +1,5 @@
 import { BotFrameworkAdapter } from 'botbuilder';
-import { QnAMaker } from 'botbuilder-ai';
+import { QnAMaker, LuisRecognizer } from 'botbuilder-ai';
 import { IQnAService, BotConfiguration } from 'botframework-config';
 import * as restify from 'restify';
 import { ConfBot } from './bot';
@@ -26,7 +26,13 @@ const qnamaker = new QnAMaker({
   host: process.env.QNA_HOST_NAME
 });
 
-const echo: ConfBot = new ConfBot(qnamaker);
+const luis = new LuisRecognizer({
+  applicationId: process.env.LUIS_APPLICATION_ID,
+  endpointKey: process.env.LUIS_ENDPOINT_KEY,
+  endpoint: process.env.LUIS_ENDPOINT
+})
+
+const echo: ConfBot = new ConfBot(qnamaker, luis);
 
 server.post("/api/messages", (req, res) => {
   adapter.processActivity(req, res, async (context) => {
