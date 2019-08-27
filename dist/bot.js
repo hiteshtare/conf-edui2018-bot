@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const botbuilder_ai_1 = require("botbuilder-ai");
 const parser_1 = require("./parser");
+const card_1 = require("./card");
 class ConfBot {
     constructor(qnaMaker, luis) {
         this._qnaMaker = qnaMaker;
@@ -34,11 +35,11 @@ class ConfBot {
                             case "Topic":
                                 data = parser_1.getData(res.entities);
                                 if (data.length > 1) {
-                                    console.log(data);
+                                    console.log(card_1.createCarousal(data, top));
                                     break;
                                 }
                                 else if (data.length == 1) {
-                                    console.log(data);
+                                    console.log(card_1.createHeroCard(data[0], top));
                                     break;
                                 }
                                 else {

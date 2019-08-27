@@ -2,6 +2,7 @@ import { SpeakerSession } from './types';
 import { TurnContext } from 'botbuilder';
 import { QnAMaker, LuisRecognizer } from 'botbuilder-ai';
 import { getData } from './parser';
+import { createCarousal, createHeroCard } from './card';
 
 export class ConfBot {
   private _qnaMaker: QnAMaker;
@@ -32,10 +33,10 @@ export class ConfBot {
             case "Topic":
               data = getData(res.entities);
               if (data.length > 1) {
-                console.log(data);
+                console.log(createCarousal(data, top));
                 break;
               } else if (data.length == 1) {
-                console.log(data);
+                console.log(createHeroCard(data[0], top));
                 break;
               }
               else {

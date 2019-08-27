@@ -16,6 +16,7 @@
     "botframework-config": "^4.5.3",
     "cheerio": "^1.0.0-rc.3",
     "dotenv": "^8.1.0",
+    "metronical.proto": "^0.1.0",
     "restify": "^8.4.0",
     "typescript": "^3.5.3"
   }
