@@ -18,17 +18,6 @@ const bot_1 = require("./bot");
 const dotenv_1 = require("dotenv");
 dotenv_1.config();
 const botConfig = botframework_config_1.BotConfiguration.loadSync('./conf-edui2018.bot');
-const blobStorage = new botbuilder_azure_1.BlobStorage({
-    containerName: process.env.BLOB_CONTAINER,
-    storageAccessKey: process.env.BLOB_STORAGE_KEY,
-    storageAccountOrConnectionString: process.env.BLOB_STORAGE_ACCOUNT_NAME
-});
-const conservationState = new botbuilder_1.ConversationState(blobStorage);
-const dialogs = new botbuilder_dialogs_1.DialogSet(conservationState.createProperty("dialogState"));
-let server = restify.createServer();
-server.listen(process.env.port || process.env.PORT || 3979, () => {
-    console.log(`${server.name} listening on ${server.url}`);
-});
 const adapter = new botbuilder_1.BotFrameworkAdapter({
     appId: process.env.MICROSOFT_APP_ID,
     appPassword: process.env.MICROSOFT_APP_PASSWORD
@@ -43,7 +32,18 @@ const luis = new botbuilder_ai_1.LuisRecognizer({
     endpointKey: process.env.LUIS_ENDPOINT_KEY,
     endpoint: process.env.LUIS_ENDPOINT
 });
+const blobStorage = new botbuilder_azure_1.BlobStorage({
+    containerName: process.env.BLOB_CONTAINER,
+    storageAccessKey: process.env.BLOB_STORAGE_KEY,
+    storageAccountOrConnectionString: process.env.BLOB_STORAGE_ACCOUNT_NAME
+});
+const conservationState = new botbuilder_1.ConversationState(blobStorage);
+const dialogs = new botbuilder_dialogs_1.DialogSet(conservationState.createProperty("dialogState"));
 const echo = new bot_1.ConfBot(qnamaker, luis, dialogs, conservationState);
+let server = restify.createServer();
+server.listen(process.env.port || process.env.PORT || 3979, () => {
+    console.log(`${server.name} listening on ${server.url}`);
+});
 server.post("/api/messages", (req, res) => {
     adapter.processActivity(req, res, (context) => __awaiter(this, void 0, void 0, function* () {
         yield echo.onTurn(context);

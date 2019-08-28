@@ -13,20 +13,6 @@ config();
 
 const botConfig = BotConfiguration.loadSync('./conf-edui2018.bot');
 
-const blobStorage = new BlobStorage({
-  containerName: process.env.BLOB_CONTAINER,
-  storageAccessKey: process.env.BLOB_STORAGE_KEY,
-  storageAccountOrConnectionString: process.env.BLOB_STORAGE_ACCOUNT_NAME
-});
-
-const conservationState = new ConversationState(blobStorage);
-const dialogs = new DialogSet(conservationState.createProperty("dialogState"));
-
-let server = restify.createServer();
-server.listen(process.env.port || process.env.PORT || 3979, () => {
-  console.log(`${server.name} listening on ${server.url}`);
-});
-
 const adapter = new BotFrameworkAdapter({
   appId: process.env.MICROSOFT_APP_ID,
   appPassword: process.env.MICROSOFT_APP_PASSWORD
@@ -42,9 +28,23 @@ const luis = new LuisRecognizer({
   applicationId: process.env.LUIS_APPLICATION_ID,
   endpointKey: process.env.LUIS_ENDPOINT_KEY,
   endpoint: process.env.LUIS_ENDPOINT
-})
+});
+
+const blobStorage = new BlobStorage({
+  containerName: process.env.BLOB_CONTAINER,
+  storageAccessKey: process.env.BLOB_STORAGE_KEY,
+  storageAccountOrConnectionString: process.env.BLOB_STORAGE_ACCOUNT_NAME
+});
+
+const conservationState = new ConversationState(blobStorage);
+const dialogs = new DialogSet(conservationState.createProperty("dialogState"));
 
 const echo: ConfBot = new ConfBot(qnamaker, luis, dialogs, conservationState);
+
+let server = restify.createServer();
+server.listen(process.env.port || process.env.PORT || 3979, () => {
+  console.log(`${server.name} listening on ${server.url}`);
+});
 
 server.post("/api/messages", (req, res) => {
   adapter.processActivity(req, res, async (context) => {
