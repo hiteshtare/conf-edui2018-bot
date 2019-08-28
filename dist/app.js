@@ -12,12 +12,18 @@ const botbuilder_1 = require("botbuilder");
 const botbuilder_ai_1 = require("botbuilder-ai");
 const botframework_config_1 = require("botframework-config");
 const botbuilder_dialogs_1 = require("botbuilder-dialogs");
+const botbuilder_azure_1 = require("botbuilder-azure");
 const restify = require("restify");
 const bot_1 = require("./bot");
 const dotenv_1 = require("dotenv");
 dotenv_1.config();
 const botConfig = botframework_config_1.BotConfiguration.loadSync('./conf-edui2018.bot');
-const conservationState = new botbuilder_1.ConversationState(new botbuilder_1.MemoryStorage());
+const blobStorage = new botbuilder_azure_1.BlobStorage({
+    containerName: process.env.BLOB_CONTAINER,
+    storageAccessKey: process.env.BLOB_STORAGE_KEY,
+    storageAccountOrConnectionString: process.env.BLOB_STORAGE_ACCOUNT_NAME
+});
+const conservationState = new botbuilder_1.ConversationState(blobStorage);
 const dialogs = new botbuilder_dialogs_1.DialogSet(conservationState.createProperty("dialogState"));
 let server = restify.createServer();
 server.listen(process.env.port || process.env.PORT || 3979, () => {

@@ -2,6 +2,8 @@ import { BotFrameworkAdapter, ConversationState, MemoryStorage } from 'botbuilde
 import { QnAMaker, LuisRecognizer } from 'botbuilder-ai';
 import { IQnAService, BotConfiguration } from 'botframework-config';
 import { DialogSet } from 'botbuilder-dialogs'
+import { BlobStorage } from 'botbuilder-azure';
+
 import * as restify from 'restify';
 import { ConfBot } from './bot';
 import { config } from 'dotenv';
@@ -11,7 +13,13 @@ config();
 
 const botConfig = BotConfiguration.loadSync('./conf-edui2018.bot');
 
-const conservationState = new ConversationState(new MemoryStorage());
+const blobStorage = new BlobStorage({
+  containerName: process.env.BLOB_CONTAINER,
+  storageAccessKey: process.env.BLOB_STORAGE_KEY,
+  storageAccountOrConnectionString: process.env.BLOB_STORAGE_ACCOUNT_NAME
+});
+
+const conservationState = new ConversationState(blobStorage);
 const dialogs = new DialogSet(conservationState.createProperty("dialogState"));
 
 let server = restify.createServer();

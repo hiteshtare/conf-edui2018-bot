@@ -24,17 +24,21 @@ export class ConfBot {
     const dc = await this._dialogs.createContext(context);
     await dc.continueDialog();
 
+    //+++++++++++++++++++++++++++++++DIALOGS+++++++++++++++++++++++++++++++//
     if (context.activity.text !== null && context.activity.text === 'help') {
       await dc.beginDialog('help');
     }
+    //+++++++++++++++++++++++++++++++DIALOGS+++++++++++++++++++++++++++++++//
     else if (context.activity.type === 'message') {
-      // await context.sendActivity(`You said ${context.activity.text}`);
+      //+++++++++++++++++++++++++++++++QNA_MAKER+++++++++++++++++++++++++++++++//
       const qnaResults = await this._qnaMaker.generateAnswer(context.activity.text);
 
       if (qnaResults.length > 0) {
         await context.sendActivity(qnaResults[0].answer);
       }
+      //+++++++++++++++++++++++++++++++QNA_MAKER+++++++++++++++++++++++++++++++//
       else {
+        //+++++++++++++++++++++++++++++LUIS+++++++++++++++++++++++++++++//
         await this._luis.recognize(context).then(async (res) => {
           const top = LuisRecognizer.topIntent(res);
           const data: SpeakerSession[] = getData(res.entities);
@@ -42,13 +46,16 @@ export class ConfBot {
           if (top === 'Time') {
             dc.beginDialog('time', data);
           }
+          //+++++++++++++++++++++++++++++++RICH_CARDS+++++++++++++++++++++++++++++++//
           else if (data.length > 1) {
             await context.sendActivity(createCarousal(data, top));
           }
           else if (data.length === 1) {
             await context.sendActivity({ attachments: [createHeroCard(data[0], top)] });
           }
+          //+++++++++++++++++++++++++++++++RICH_CARDS+++++++++++++++++++++++++++++++//
         });// end of _luis.recognize
+        //+++++++++++++++++++++++++++++LUIS+++++++++++++++++++++++++++++//
       }
     }
     else {
