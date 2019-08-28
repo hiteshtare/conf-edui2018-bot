@@ -39,7 +39,7 @@ const blobStorage = new BlobStorage({
 const conservationState = new ConversationState(blobStorage);
 const dialogs = new DialogSet(conservationState.createProperty("dialogState"));
 
-const echo: ConfBot = new ConfBot(qnamaker, luis, dialogs, conservationState);
+const echo: ConfBot = new ConfBot(qnamaker, luis, dialogs, conservationState, blobStorage, adapter);
 
 let server = restify.createServer();
 server.listen(process.env.port || process.env.PORT || 3979, () => {

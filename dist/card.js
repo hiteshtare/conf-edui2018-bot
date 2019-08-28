@@ -38,7 +38,11 @@ function createHeroCard(data, topIntent) {
             break;
     }
     return botbuilder_1.CardFactory.heroCard(title, botbuilder_1.CardFactory.images(images), botbuilder_1.CardFactory.actions([{
-            type: "openUrl",
+            type: botbuilder_1.ActionTypes.PostBack,
+            title: "Save",
+            value: `SAVE:${data.title}`
+        }, {
+            type: botbuilder_1.ActionTypes.OpenUrl,
             title: "Read more..",
             value: data.link
         }]), { subtitle: subTitle, text: text });

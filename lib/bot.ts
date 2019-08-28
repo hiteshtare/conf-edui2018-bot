@@ -1,22 +1,29 @@
-import { TurnContext, ConversationState } from 'botbuilder';
+import { BlobStorage } from 'botbuilder-azure';
+import { TurnContext, ConversationState, BotAdapter } from 'botbuilder';
 import { QnAMaker, LuisRecognizer } from 'botbuilder-ai';
 import { DialogSet, WaterfallDialog, WaterfallStepContext, ChoicePrompt, PromptOptions } from 'botbuilder-dialogs';
 import { createCarousal, createHeroCard } from './card';
 import { getData } from './parser';
 import { SpeakerSession } from './types';
 import { getTime } from './dialogs';
+import { saveRef, subscribe } from './proactive';
 
 export class ConfBot {
   private _qnaMaker: QnAMaker;
   private _luis: LuisRecognizer;
   private _dialogs: DialogSet;
   private _conversationState: ConversationState;
+  private _storage: BlobStorage;
+  private _adapter: BotAdapter;
 
-  constructor(qnaMaker: QnAMaker, luis: LuisRecognizer, dialogs: DialogSet, conversationState: ConversationState) {
+  constructor(qnaMaker: QnAMaker, luis: LuisRecognizer, dialogs: DialogSet, conversationState: ConversationState,
+    storage: BlobStorage, adapter: BotAdapter) {
     this._qnaMaker = qnaMaker;
     this._luis = luis;
     this._dialogs = dialogs;
     this._conversationState = conversationState;
+    this._storage = storage;
+    this._adapter = adapter;
     this.addDialogs();
   }
 
@@ -30,6 +37,8 @@ export class ConfBot {
     }
     //+++++++++++++++++++++++++++++++DIALOGS+++++++++++++++++++++++++++++++//
     else if (context.activity.type === 'message') {
+      const userId: string = await saveRef(TurnContext.getConversationReference(context.activity), this._storage);
+      await subscribe(userId, this._storage, this._adapter);
       //+++++++++++++++++++++++++++++++QNA_MAKER+++++++++++++++++++++++++++++++//
       const qnaResults = await this._qnaMaker.generateAnswer(context.activity.text);
 

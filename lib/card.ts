@@ -1,5 +1,5 @@
 import { SpeakerSession } from './types';
-import { MessageFactory, Activity, CardFactory, Attachment } from 'botbuilder';
+import { MessageFactory, Activity, CardFactory, Attachment, ActionTypes } from 'botbuilder';
 import { s } from 'metronical.proto';
 
 //Creates a carousal
@@ -48,7 +48,11 @@ export function createHeroCard(data: SpeakerSession, topIntent: string): Attachm
     title,
     CardFactory.images(images),
     CardFactory.actions([{
-      type: "openUrl",
+      type: ActionTypes.PostBack,
+      title: "Save",
+      value: `SAVE:${data.title}`
+    }, {
+      type: ActionTypes.OpenUrl,
       title: "Read more..",
       value: data.link
     }]), { subtitle: subTitle, text: text }

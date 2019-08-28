@@ -39,7 +39,7 @@ const blobStorage = new botbuilder_azure_1.BlobStorage({
 });
 const conservationState = new botbuilder_1.ConversationState(blobStorage);
 const dialogs = new botbuilder_dialogs_1.DialogSet(conservationState.createProperty("dialogState"));
-const echo = new bot_1.ConfBot(qnamaker, luis, dialogs, conservationState);
+const echo = new bot_1.ConfBot(qnamaker, luis, dialogs, conservationState, blobStorage, adapter);
 let server = restify.createServer();
 server.listen(process.env.port || process.env.PORT || 3979, () => {
     console.log(`${server.name} listening on ${server.url}`);

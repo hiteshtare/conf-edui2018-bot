@@ -30,5 +30,7 @@
         }
     ],
     "padlock": "",
-    "version": "2.0"
+    "version": "2.0",
+    "overrides": null,
+    "path": "/home/hitesh/Documents/Personal/Tech/Bot/conf-edui2018-bot/conf-edui2018.bot"
 }

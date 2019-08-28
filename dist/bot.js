@@ -8,17 +8,21 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const botbuilder_1 = require("botbuilder");
 const botbuilder_ai_1 = require("botbuilder-ai");
 const botbuilder_dialogs_1 = require("botbuilder-dialogs");
 const card_1 = require("./card");
 const parser_1 = require("./parser");
 const dialogs_1 = require("./dialogs");
+const proactive_1 = require("./proactive");
 class ConfBot {
-    constructor(qnaMaker, luis, dialogs, conversationState) {
+    constructor(qnaMaker, luis, dialogs, conversationState, storage, adapter) {
         this._qnaMaker = qnaMaker;
         this._luis = luis;
         this._dialogs = dialogs;
         this._conversationState = conversationState;
+        this._storage = storage;
+        this._adapter = adapter;
         this.addDialogs();
     }
     onTurn(context) {
@@ -29,6 +33,8 @@ class ConfBot {
                 yield dc.beginDialog('help');
             }
             else if (context.activity.type === 'message') {
+                const userId = yield proactive_1.saveRef(botbuilder_1.TurnContext.getConversationReference(context.activity), this._storage);
+                yield proactive_1.subscribe(userId, this._storage, this._adapter);
                 const qnaResults = yield this._qnaMaker.generateAnswer(context.activity.text);
                 if (qnaResults.length > 0) {
                     yield context.sendActivity(qnaResults[0].answer);
