@@ -1,6 +1,7 @@
-import { BotFrameworkAdapter } from 'botbuilder';
+import { BotFrameworkAdapter, ConversationState, MemoryStorage } from 'botbuilder';
 import { QnAMaker, LuisRecognizer } from 'botbuilder-ai';
 import { IQnAService, BotConfiguration } from 'botframework-config';
+import { DialogSet } from 'botbuilder-dialogs'
 import * as restify from 'restify';
 import { ConfBot } from './bot';
 import { config } from 'dotenv';
@@ -9,6 +10,9 @@ import * as path from 'path';
 config();
 
 const botConfig = BotConfiguration.loadSync('./conf-edui2018.bot');
+
+const conservationState = new ConversationState(new MemoryStorage());
+const dialogs = new DialogSet(conservationState.createProperty("dialogState"));
 
 let server = restify.createServer();
 server.listen(process.env.port || process.env.PORT || 3979, () => {
@@ -32,7 +36,7 @@ const luis = new LuisRecognizer({
   endpoint: process.env.LUIS_ENDPOINT
 })
 
-const echo: ConfBot = new ConfBot(qnamaker, luis);
+const echo: ConfBot = new ConfBot(qnamaker, luis, dialogs, conservationState);
 
 server.post("/api/messages", (req, res) => {
   adapter.processActivity(req, res, async (context) => {

@@ -11,11 +11,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const botbuilder_1 = require("botbuilder");
 const botbuilder_ai_1 = require("botbuilder-ai");
 const botframework_config_1 = require("botframework-config");
+const botbuilder_dialogs_1 = require("botbuilder-dialogs");
 const restify = require("restify");
 const bot_1 = require("./bot");
 const dotenv_1 = require("dotenv");
 dotenv_1.config();
 const botConfig = botframework_config_1.BotConfiguration.loadSync('./conf-edui2018.bot');
+const conservationState = new botbuilder_1.ConversationState(new botbuilder_1.MemoryStorage());
+const dialogs = new botbuilder_dialogs_1.DialogSet(conservationState.createProperty("dialogState"));
 let server = restify.createServer();
 server.listen(process.env.port || process.env.PORT || 3979, () => {
     console.log(`${server.name} listening on ${server.url}`);
@@ -34,7 +37,7 @@ const luis = new botbuilder_ai_1.LuisRecognizer({
     endpointKey: process.env.LUIS_ENDPOINT_KEY,
     endpoint: process.env.LUIS_ENDPOINT
 });
-const echo = new bot_1.ConfBot(qnamaker, luis);
+const echo = new bot_1.ConfBot(qnamaker, luis, dialogs, conservationState);
 server.post("/api/messages", (req, res) => {
     adapter.processActivity(req, res, (context) => __awaiter(this, void 0, void 0, function* () {
         yield echo.onTurn(context);
