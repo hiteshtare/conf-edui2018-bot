@@ -9,9 +9,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const botbuilder_ai_1 = require("botbuilder-ai");
-const parser_1 = require("./parser");
-const card_1 = require("./card");
 const botbuilder_dialogs_1 = require("botbuilder-dialogs");
+const card_1 = require("./card");
+const parser_1 = require("./parser");
+const dialogs_1 = require("./dialogs");
 class ConfBot {
     constructor(qnaMaker, luis, dialogs, conversationState) {
         this._qnaMaker = qnaMaker;
@@ -37,6 +38,7 @@ class ConfBot {
                         const top = botbuilder_ai_1.LuisRecognizer.topIntent(res);
                         const data = parser_1.getData(res.entities);
                         if (top === 'Time') {
+                            dc.beginDialog('time', data);
                         }
                         else if (data.length > 1) {
                             yield context.sendActivity(card_1.createCarousal(data, top));
@@ -54,16 +56,16 @@ class ConfBot {
         });
     }
     addDialogs() {
-        this._dialogs.add(new botbuilder_dialogs_1.WaterfallDialog("help", [
+        this._dialogs.add(new botbuilder_dialogs_1.WaterfallDialog('help', [
             (step) => __awaiter(this, void 0, void 0, function* () {
-                const choices = ["I want to know about a topic",
-                    "I want to know about a speaker",
-                    "I want to know about a venue"];
+                const choices = ['I want to know about a topic',
+                    'I want to know about a speaker',
+                    'I want to know about a venue'];
                 const options = {
-                    prompt: "What would you like to know?",
+                    prompt: 'What would you like to know?',
                     choices: choices
                 };
-                return yield step.prompt("choicePrompt", options);
+                return yield step.prompt('choicePrompt', options);
             }),
             (step) => __awaiter(this, void 0, void 0, function* () {
                 switch (step.result.index) {
@@ -91,7 +93,13 @@ class ConfBot {
                 return yield step.endDialog();
             })
         ]));
-        this._dialogs.add(new botbuilder_dialogs_1.ChoicePrompt("choicePrompt"));
+        this._dialogs.add(new botbuilder_dialogs_1.ChoicePrompt('choicePrompt'));
+        this._dialogs.add(new botbuilder_dialogs_1.WaterfallDialog('time', [
+            (step) => __awaiter(this, void 0, void 0, function* () {
+                yield step.context.sendActivities(dialogs_1.getTime(step.activeDialog.state.options));
+                return yield step.endDialog();
+            })
+        ]));
     }
 }
 exports.ConfBot = ConfBot;

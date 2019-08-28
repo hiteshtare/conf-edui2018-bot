@@ -1,3 +1,5 @@
+export const LINGO: string[] = ['Also', 'In Addition', 'Additionally', 'Like'];
+
 export interface SpeakerImage {
   type: string;
   link: string;

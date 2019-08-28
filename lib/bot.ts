@@ -1,9 +1,10 @@
-import { SpeakerSession } from './types';
 import { TurnContext, ConversationState } from 'botbuilder';
 import { QnAMaker, LuisRecognizer } from 'botbuilder-ai';
-import { getData } from './parser';
-import { createCarousal, createHeroCard } from './card';
 import { DialogSet, WaterfallDialog, WaterfallStepContext, ChoicePrompt, PromptOptions } from 'botbuilder-dialogs';
+import { createCarousal, createHeroCard } from './card';
+import { getData } from './parser';
+import { SpeakerSession } from './types';
+import { getTime } from './dialogs';
 
 export class ConfBot {
   private _qnaMaker: QnAMaker;
@@ -39,7 +40,7 @@ export class ConfBot {
           const data: SpeakerSession[] = getData(res.entities);
 
           if (top === 'Time') {
-            //
+            dc.beginDialog('time', data);
           }
           else if (data.length > 1) {
             await context.sendActivity(createCarousal(data, top));
@@ -58,16 +59,16 @@ export class ConfBot {
   }
 
   private addDialogs() {
-    this._dialogs.add(new WaterfallDialog("help", [
+    this._dialogs.add(new WaterfallDialog('help', [
       async (step: WaterfallStepContext) => {
-        const choices = ["I want to know about a topic"
-          , "I want to know about a speaker"
-          , "I want to know about a venue"];
+        const choices = ['I want to know about a topic'
+          , 'I want to know about a speaker'
+          , 'I want to know about a venue'];
         const options: PromptOptions = {
-          prompt: "What would you like to know?"
+          prompt: 'What would you like to know?'
           , choices: choices
         };
-        return await step.prompt("choicePrompt", options);
+        return await step.prompt('choicePrompt', options);
       },
       async (step: WaterfallStepContext) => {
         switch (step.result.index) {
@@ -96,6 +97,14 @@ export class ConfBot {
       }
     ]));
 
-    this._dialogs.add(new ChoicePrompt("choicePrompt"));
+    this._dialogs.add(new ChoicePrompt('choicePrompt'));
+
+    this._dialogs.add(new WaterfallDialog('time', [
+      async (step: WaterfallStepContext) => {
+        await step.context.sendActivities(getTime(step.activeDialog.state.options));
+        return await step.endDialog();
+      }
+    ]));
+
   }
 }
