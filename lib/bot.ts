@@ -6,7 +6,7 @@ import { createCarousal, createHeroCard } from './card';
 import { getData } from './parser';
 import { SpeakerSession } from './types';
 import { getTime } from './dialogs';
-import { saveRef, subscribe } from './proactive';
+import { saveRef, subscribe, getRef } from './proactive';
 
 export class ConfBot {
   private _qnaMaker: QnAMaker;
@@ -15,6 +15,7 @@ export class ConfBot {
   private _conversationState: ConversationState;
   private _storage: BlobStorage;
   private _adapter: BotAdapter;
+  private _saveSessions: string[] = [];
 
   constructor(qnaMaker: QnAMaker, luis: LuisRecognizer, dialogs: DialogSet, conversationState: ConversationState,
     storage: BlobStorage, adapter: BotAdapter) {
@@ -38,34 +39,49 @@ export class ConfBot {
     //+++++++++++++++++++++++++++++++DIALOGS+++++++++++++++++++++++++++++++//
     else if (context.activity.type === 'message') {
       const userId: string = await saveRef(TurnContext.getConversationReference(context.activity), this._storage);
-      await subscribe(userId, this._storage, this._adapter);
-      //+++++++++++++++++++++++++++++++QNA_MAKER+++++++++++++++++++++++++++++++//
-      const qnaResults = await this._qnaMaker.generateAnswer(context.activity.text);
+      await subscribe(userId, this._storage, this._adapter, this._saveSessions);
 
-      if (qnaResults.length > 0) {
-        await context.sendActivity(qnaResults[0].answer);
+      //+++++++++++++++++++++++++++++++PROACTIVE_MESSAGING+++++++++++++++++++++++++++++++//
+      if (context.activity.text.indexOf('SAVE:') !== -1) {
+        const title = context.activity.text.replace('SAVE:', "");
+        if (this._saveSessions.indexOf(title) !== -1) {
+          this._saveSessions.push(title);
+        }
+        const ref = await getRef(userId, this._storage, this._saveSessions);
+        ref['speakerSession'] = JSON.stringify(this._saveSessions);
+        await saveRef(ref, this._storage);
+        await context.sendActivity(`You have saved ${title} to your speaker session list.`)
       }
-      //+++++++++++++++++++++++++++++++QNA_MAKER+++++++++++++++++++++++++++++++//
+      //+++++++++++++++++++++++++++++++PROACTIVE_MESSAGING+++++++++++++++++++++++++++++++//
       else {
-        //+++++++++++++++++++++++++++++LUIS+++++++++++++++++++++++++++++//
-        await this._luis.recognize(context).then(async (res) => {
-          const top = LuisRecognizer.topIntent(res);
-          const data: SpeakerSession[] = getData(res.entities);
+        //+++++++++++++++++++++++++++++++QNA_MAKER+++++++++++++++++++++++++++++++//
+        const qnaResults = await this._qnaMaker.generateAnswer(context.activity.text);
 
-          if (top === 'Time') {
-            dc.beginDialog('time', data);
-          }
-          //+++++++++++++++++++++++++++++++RICH_CARDS+++++++++++++++++++++++++++++++//
-          else if (data.length > 1) {
-            await context.sendActivity(createCarousal(data, top));
-          }
-          else if (data.length === 1) {
-            await context.sendActivity({ attachments: [createHeroCard(data[0], top)] });
-          }
-          //+++++++++++++++++++++++++++++++RICH_CARDS+++++++++++++++++++++++++++++++//
-        });// end of _luis.recognize
-        //+++++++++++++++++++++++++++++LUIS+++++++++++++++++++++++++++++//
-      }
+        if (qnaResults.length > 0) {
+          await context.sendActivity(qnaResults[0].answer);
+        }
+        //+++++++++++++++++++++++++++++++QNA_MAKER+++++++++++++++++++++++++++++++//
+        else {
+          //+++++++++++++++++++++++++++++LUIS+++++++++++++++++++++++++++++//
+          await this._luis.recognize(context).then(async (res) => {
+            const top = LuisRecognizer.topIntent(res);
+            const data: SpeakerSession[] = getData(res.entities);
+
+            if (top === 'Time') {
+              dc.beginDialog('time', data);
+            }
+            //+++++++++++++++++++++++++++++++RICH_CARDS+++++++++++++++++++++++++++++++//
+            else if (data.length > 1) {
+              await context.sendActivity(createCarousal(data, top));
+            }
+            else if (data.length === 1) {
+              await context.sendActivity({ attachments: [createHeroCard(data[0], top)] });
+            }
+            //+++++++++++++++++++++++++++++++RICH_CARDS+++++++++++++++++++++++++++++++//
+          });// end of _luis.recognize
+          //+++++++++++++++++++++++++++++LUIS+++++++++++++++++++++++++++++//
+        }
+      }// end of context.activity.text.indexOf('SAVE:')
     }
     else {
       await context.sendActivity(`${context.activity.type} event detected.`);

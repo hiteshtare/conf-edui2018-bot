@@ -17,6 +17,7 @@ const dialogs_1 = require("./dialogs");
 const proactive_1 = require("./proactive");
 class ConfBot {
     constructor(qnaMaker, luis, dialogs, conversationState, storage, adapter) {
+        this._saveSessions = [];
         this._qnaMaker = qnaMaker;
         this._luis = luis;
         this._dialogs = dialogs;
@@ -34,25 +35,37 @@ class ConfBot {
             }
             else if (context.activity.type === 'message') {
                 const userId = yield proactive_1.saveRef(botbuilder_1.TurnContext.getConversationReference(context.activity), this._storage);
-                yield proactive_1.subscribe(userId, this._storage, this._adapter);
-                const qnaResults = yield this._qnaMaker.generateAnswer(context.activity.text);
-                if (qnaResults.length > 0) {
-                    yield context.sendActivity(qnaResults[0].answer);
+                yield proactive_1.subscribe(userId, this._storage, this._adapter, this._saveSessions);
+                if (context.activity.text.indexOf('SAVE:') !== -1) {
+                    const title = context.activity.text.replace('SAVE:', "");
+                    if (this._saveSessions.indexOf(title) !== -1) {
+                        this._saveSessions.push(title);
+                    }
+                    const ref = yield proactive_1.getRef(userId, this._storage, this._saveSessions);
+                    ref['speakerSession'] = JSON.stringify(this._saveSessions);
+                    yield proactive_1.saveRef(ref, this._storage);
+                    yield context.sendActivity(`You have saved ${title} to your speaker session list.`);
                 }
                 else {
-                    yield this._luis.recognize(context).then((res) => __awaiter(this, void 0, void 0, function* () {
-                        const top = botbuilder_ai_1.LuisRecognizer.topIntent(res);
-                        const data = parser_1.getData(res.entities);
-                        if (top === 'Time') {
-                            dc.beginDialog('time', data);
-                        }
-                        else if (data.length > 1) {
-                            yield context.sendActivity(card_1.createCarousal(data, top));
-                        }
-                        else if (data.length === 1) {
-                            yield context.sendActivity({ attachments: [card_1.createHeroCard(data[0], top)] });
-                        }
-                    }));
+                    const qnaResults = yield this._qnaMaker.generateAnswer(context.activity.text);
+                    if (qnaResults.length > 0) {
+                        yield context.sendActivity(qnaResults[0].answer);
+                    }
+                    else {
+                        yield this._luis.recognize(context).then((res) => __awaiter(this, void 0, void 0, function* () {
+                            const top = botbuilder_ai_1.LuisRecognizer.topIntent(res);
+                            const data = parser_1.getData(res.entities);
+                            if (top === 'Time') {
+                                dc.beginDialog('time', data);
+                            }
+                            else if (data.length > 1) {
+                                yield context.sendActivity(card_1.createCarousal(data, top));
+                            }
+                            else if (data.length === 1) {
+                                yield context.sendActivity({ attachments: [card_1.createHeroCard(data[0], top)] });
+                            }
+                        }));
+                    }
                 }
             }
             else {
