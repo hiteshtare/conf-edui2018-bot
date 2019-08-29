@@ -55,9 +55,9 @@ export class ConfBot {
       //+++++++++++++++++++++++++++++++PROACTIVE_MESSAGING+++++++++++++++++++++++++++++++//
       else if (!context.responded) {
         //+++++++++++++++++++++++++++++++QNA_MAKER+++++++++++++++++++++++++++++++//
-        const qnaResults = await this._qnaMaker.generateAnswer(context.activity.text);
+        const qnaResults = await this._qnaMaker.generateAnswer(context.activity.text, 3, 0.65);
 
-        if (qnaResults.length > 0 && qnaResults[0].score > 0.65) {
+        if (qnaResults.length > 0) {
           await context.sendActivity(qnaResults[0].answer);
         }
         //+++++++++++++++++++++++++++++++QNA_MAKER+++++++++++++++++++++++++++++++//
