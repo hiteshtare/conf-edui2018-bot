@@ -53,11 +53,11 @@ export class ConfBot {
         await context.sendActivity(`You have saved ${title} to your speaker session list.`)
       }
       //+++++++++++++++++++++++++++++++PROACTIVE_MESSAGING+++++++++++++++++++++++++++++++//
-      else {
+      else if (!context.responded) {
         //+++++++++++++++++++++++++++++++QNA_MAKER+++++++++++++++++++++++++++++++//
         const qnaResults = await this._qnaMaker.generateAnswer(context.activity.text);
 
-        if (qnaResults.length > 0) {
+        if (qnaResults.length > 0 && qnaResults[0].score > 0.65) {
           await context.sendActivity(qnaResults[0].answer);
         }
         //+++++++++++++++++++++++++++++++QNA_MAKER+++++++++++++++++++++++++++++++//

@@ -46,9 +46,9 @@ class ConfBot {
                     yield proactive_1.saveRef(ref, this._storage);
                     yield context.sendActivity(`You have saved ${title} to your speaker session list.`);
                 }
-                else {
+                else if (!context.responded) {
                     const qnaResults = yield this._qnaMaker.generateAnswer(context.activity.text);
-                    if (qnaResults.length > 0) {
+                    if (qnaResults.length > 0 && qnaResults[0].score > 0.65) {
                         yield context.sendActivity(qnaResults[0].answer);
                     }
                     else {
