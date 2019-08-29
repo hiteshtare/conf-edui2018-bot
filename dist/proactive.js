@@ -10,18 +10,18 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 function saveRef(ref, storage) {
     return __awaiter(this, void 0, void 0, function* () {
-        const changes = [];
-        changes[`references/${ref.activityId}`] = ref;
+        const changes = {};
+        changes[`reference/${ref.activityId}`] = ref;
         yield storage.write(changes);
-        return Promise.resolve(ref.activityId);
+        return yield ref.activityId;
     });
 }
 exports.saveRef = saveRef;
 function getRef(userId, storage) {
     return __awaiter(this, void 0, void 0, function* () {
-        const key = `references/${userId}`;
-        var result = yield storage.read([key]);
-        return Promise.resolve(result);
+        const key = `reference/${userId}`;
+        var r = yield storage.read([key]);
+        return yield r[key];
     });
 }
 function subscribe(userId, storage, adapter) {

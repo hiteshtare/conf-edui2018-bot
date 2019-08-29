@@ -2,16 +2,16 @@ import { ConversationReference, BotAdapter, TurnContext } from 'botbuilder';
 import { BlobStorage } from 'botbuilder-azure';
 
 export async function saveRef(ref: Partial<ConversationReference>, storage: BlobStorage): Promise<string> {
-  const changes = [];
-  changes[`references/${ref.activityId}`] = ref;
+  const changes = {};
+  changes[`reference/${ref.activityId}`] = ref;
   await storage.write(changes);
-  return Promise.resolve(ref.activityId);
+  return await ref.activityId;
 }
 
 async function getRef(userId: string, storage: BlobStorage): Promise<any> {
-  const key = `references/${userId}`;
-  var result = await storage.read([key]);
-  return Promise.resolve(result);
+  const key = `reference/${userId}`;
+  var r = await storage.read([key]);
+  return await r[key];
 }
 
 export async function subscribe(userId: string, storage: BlobStorage, adapter: BotAdapter): Promise<any> {
@@ -22,6 +22,5 @@ export async function subscribe(userId: string, storage: BlobStorage, adapter: B
         await context.sendActivity("Proactive message is sent");
       })
     }
-
   }, 3000);
 }
